@@ -46,9 +46,10 @@ ggplot(data=newdf,aes(x=country,y=Frequency,color=country))+
 
 ```{r, echo=FALSE}
 ggplot(data=netflix)+
-  geom_histogram(mapping = aes(x=release_year,fill=type))
+  geom_histogram(mapping = aes(x=release_year,fill=type),binwidth=10)
 
 ```
+
 3. What are the different ratings
 
 ```{r}
@@ -75,8 +76,9 @@ netflix %>% separate_rows(listed_in, sep=", ") %>%
 
 ```{r}
 durationdf <- netflix %>% select(country,duration,release_year) %>% 
-  filter(country=='United States' | country== 'India',type=='Movie') %>%
+  filter(country=='United States' | country== 'India', type== 'Movie') %>%
   mutate(decade= 10 * (release_year %/% 10))
+
 
 # The column duration was being treated as characeter and was giving error while plotting
 durationdf$duration <- as.numeric(as.character(durationdf$duration))
@@ -93,6 +95,27 @@ ggplot(data=durationdf,aes(decade,duration,group=decade))+
 ```{r}
 netflix$date_added <- netflix %>% mutate(date_added = mdy(date_added))
 summary(netflix$date_added)
+view(netflix)
 
+```
+
+7. Finding top countries easy method
+
+```{r}
+netflix %>% filter(!is.na(country)) %>%
+  count(country, sort=TRUE)
+
+```
+
+8. Over time, which country had more TV shows vs movies. Only for top 10
+
+```{r}
+netflix %>% filter(!is.na(country)) %>%
+  count(country=fct_lump(country,9),
+        type,
+        sort=TRUE) %>%
+  mutate(country=fct_reorder(country,n)) %>%
+  ggplot(aes(n,country,fill=type))+
+  geom_col()
 ```
 
